@@ -1,6 +1,11 @@
 #!/bin/bash
 
 declare -a allServices=("sms-pusher" "auth" "me" "bazar" "bank-info" "portfolio" "admin-portal" "swagger" "kong")
+if [[ $service == "" ]]; then
+    echo -e '\033[31m 🚫 no service provided'
+    exit 1
+fi
+
 if [[ ! " ${allServices[*]} " =~ " ${service} " ]]; then
     echo -e '\033[31m 🚫 no such service! check and retry!'
     exit 1
