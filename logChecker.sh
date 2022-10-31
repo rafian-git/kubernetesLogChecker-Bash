@@ -1,5 +1,11 @@
 #!/bin/bash
 
+declare -a allServices=("sms-pusher" "auth" "me" "bazar" "bank-info" "portfolio" "admin-portal" "swagger" "kong")
+if [[ ! " ${allServices[*]} " =~ " ${service} " ]]; then
+    echo -e '\033[31m 🚫 no such service! check and retry!'
+    exit 1
+fi
+
 echo "⏳$service"
 pods=($(kubectl get pods -n $service --no-headers -o custom-columns=":metadata.name" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
 status=($(kubectl get pods -n $service --no-headers -o custom-columns=":status.phase" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
