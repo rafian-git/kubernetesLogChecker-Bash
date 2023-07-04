@@ -1,6 +1,6 @@
 #!/bin/bash
 
-declare -a allServices=("sms-pusher" "auth" "me" "bazar" "bank-info" "portfolio" "admin-portal" "swagger" "kong")
+declare -a allServices=("sms-pusher" "auth" "me" "guest" "bazar" "bank-info" "portfolio" "admin-portal" "swagger" "kong")
 if [[ $service == "" ]]; then
     echo -e '\033[31m 🚫 no service provided'
     exit 1
@@ -11,9 +11,17 @@ if [[ ! " ${allServices[*]} " =~ " ${service} " ]]; then
     exit 1
 fi
 
+if [[ $container == "" ]]; then
+    container=$service
+fi
+
+if [[ $namespace == "" ]]; then
+    namespace=$service
+fi
+
 echo "⏳$service"
-pods=($(kubectl get pods -n $service --no-headers -o custom-columns=":metadata.name" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
-status=($(kubectl get pods -n $service --no-headers -o custom-columns=":status.phase" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
+pods=($(kubectl get pods -n $namespace --no-headers -o custom-columns=":metadata.name" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
+status=($(kubectl get pods -n $namespace --no-headers -o custom-columns=":status.phase" 2>&1 | grep -i -v "Warn" | grep -i -v "Deprecat" | grep -i -v "learn"))
 if [[ ${#pods[@]} == 0 ]]
 then
     echo "🚫 No pods found"
@@ -24,13 +32,13 @@ elif
     if [[ ${status[0]} == "Running" ]]; then
       echo "✅ Pod is running - showing logs below"
       sleep 1
-      kubectl logs -n $service ${pods[0]} -c $service -f 
+      kubectl logs -n $namespace ${pods[0]} -c $container -f 
     else
       echo "🚫 Pod is not running ~ Status: ${status[0]}"
       exit 1
     fi
 else
-    echo "❗ More than one pod found"
+    echo "❗ More than one pods found"
     echo "🔎 Checking pods' status"
     sleep 1
     for i in "${!pods[@]}"
@@ -47,7 +55,7 @@ else
       if [[ ${status[$input]} == "Running" ]]; then
         echo "✅ Pod is running - showing logs below"
         sleep 1 
-        kubectl logs -n $service ${pods[$input]} -c $service -f 
+        kubectl logs -n $namespace ${pods[$input]} -c $container -f 
       else
         echo "🚫 Pod is not running ~ Status: ${status[$input]}"
         exit 1
