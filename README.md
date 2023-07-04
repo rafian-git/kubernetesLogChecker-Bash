@@ -2,7 +2,7 @@
 takes in service name and checks log of that kubernetes pod
 
 ### usage
-```container="foo" service="auth" ./logChecker.sh```
+```namespace="foo" container="bar" service="auth" ./logChecker.sh```
 
 ### response
 ``` ⏳auth
